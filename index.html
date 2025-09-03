@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ผจญภัยในโลกโมเลกุลเคมีอินทรีย์</title>
+    <style>
+        /* CSS สำหรับ UI เรียบง่าย น่าสนใจ Responsive design */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff; /* สีฟ้าอ่อน เหมาะวัยรุ่น */
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            text-align: center;
+        }
+        .container {
+            max-width: 600px; /* ปรับขนาดสำหรับมือถือ/iPad */
+            width: 100%;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #4CAF50; /* สีเขียวสดใส */
+        }
+        #start-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        #quiz {
+            display: none;
+        }
+        .question {
+            font-size: 18px;
+            margin: 20px 0;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .option {
+            background: #e0f7fa;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .option:hover {
+            background: #b2ebf2;
+        }
+        #feedback {
+            font-size: 16px;
+            margin: 10px 0;
+            animation: fadeIn 0.5s; /* Animation ง่ายๆ สำหรับ feedback */
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        #score {
+            font-size: 20px;
+            color: #2196F3;
+        }
+        .badge {
+            background: #FFEB3B;
+            color: #333;
+            padding: 5px 10px;
+            margin: 5px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+        .character {
+            font-size: 50px; /* Emoji สำหรับตัวการ์ตูน */
+            margin: 10px 0;
+        }
+        /* Media query สำหรับ responsive บนมือถือ */
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
+            h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ผจญภัยในโลกโมเลกุลเคมีอินทรีย์ 🧪🔬</h1>
+        <div class="character">🧑‍🔬</div> <!-- Emoji สำหรับตัวละครวัยรุ่น -->
+        <p>เฮ้ย! คุณคือนักสำรวจโมเลกุล พร้อมผจญภัยผ่าน 20 ด่านเพื่อค้นหาสมบัติเคมีแล้วหรือยัง? ตอบคำถามให้ถูกเพื่อปลดล็อค!</p>
+        <button id="start-btn">เริ่มผจญภัย</button>
+        <div id="quiz">
+            <div id="progress">ด่าน: <span id="question-num">1/20</span></div>
+            <div class="question" id="question"></div>
+            <div class="options" id="options"></div>
+            <div id="feedback"></div>
+            <div id="score">คะแนน: 0</div>
+            <div id="badges"></div>
+            <button id="restart-btn" style="display:none;">เล่นใหม่</button>
+        </div>
+    </div>
+
+    <script>
+        // JavaScript สำหรับ logic เกม
+        // Array ของ 20 คำถาม (questions) แต่ละข้อมี question, options (4 ช้อยส์), correct (index ของคำตอบถูก), explanation (สำหรับ feedback)
+        const questions = [
+            // กลุ่ม Alkane (5 ข้อ)
+            { question: "สารประกอบที่มีสูตร CH3-CH2-CH3 ชื่อว่าอะไร?", options: ["Methane", "Ethane", "Propane", "Butane"], correct: 2, explanation: "Propane มี 3 คาร์บอน" },
+            { question: "Alkane ที่มีจำนวนคาร์บอน 5 อะตอม ชื่อว่าอะไร?", options: ["Butane", "Pentane", "Hexane", "Heptane"], correct: 1, explanation: "Pentane = C5H12" },
+            { question: "ชื่อของ alkane C4H10 คืออะไร?", options: ["Methane", "Ethane", "Propane", "Butane"], correct: 3, explanation: "Butane มี 4 คาร์บอน" },
+            { question: "จำนวนคาร์บอนใน hexane คือเท่าไหร่?", options: ["4", "5", "6", "7"], correct: 2, explanation: "Hexane = C6H14" },
+            { question: "โครงสร้างแบบย่อของ propane คืออะไร?", options: ["CH4", "C2H6", "C3H8", "C4H10"], correct: 2, explanation: "Propane = C3H8" },
+
+            // กลุ่ม Alkene/Alkyne (5 ข้อ)
+            { question: "Alkene ที่มีสูตร C2H4 ชื่อว่าอะไร?", options: ["Ethane", "Ethene", "Ethyne", "Propene"], correct: 1, explanation: "Ethene คือ alkene ที่เล็กที่สุด" },
+            { question: "Alkyne ที่มีพันธะสาม ชื่อ prop- สำหรับกี่คาร์บอน?", options: ["2", "3", "4", "5"], correct: 1, explanation: "Propyne = C3H4" },
+            { question: "ชื่อของ C3H6 คืออะไร?", options: ["Propane", "Propene", "Propyne", "Butene"], correct: 1, explanation: "Propene เป็น alkene" },
+            { question: "จำนวนคาร์บอนใน butene คือเท่าไหร่?", options: ["3", "4", "5", "6"], correct: 1, explanation: "Butene = C4H8" },
+            { question: "โครงสร้างแบบเส้นของ ethyne แสดงพันธะอะไร?", options: ["เดี่ยว", "คู่", "สาม", "สี่"], correct: 2, explanation: "Ethyne มีพันธะสาม" },
+
+            // กลุ่ม หมู่ฟังก์ชัน (5 ข้อ)
+            { question: "หมู่ -OH คือฟังก์ชันอะไร?", options: ["Aldehyde", "Alcohol", "Ketone", "Carboxylic acid"], correct: 1, explanation: "-OH คือ alcohol" },
+            { question: "สารที่มีหมู่ -CHO คืออะไร?", options: ["Alcohol", "Aldehyde", "Amine", "Ether"], correct: 1, explanation: "-CHO คือ aldehyde" },
+            { question: "หมู่ฟังก์ชันใน acetic acid คืออะไร?", options: ["-OH", "-COOH", "-NH2", "-CHO"], correct: 1, explanation: "-COOH คือ carboxylic acid" },
+            { question: "Ketone มีหมู่ฟังก์ชันอะไร?", options: ["-C=O (กลาง)", "-OH", "-COOH", "-NH2"], correct: 0, explanation: "Ketone มี C=O ตรงกลาง" },
+            { question: "ระบุหมู่ใน ethanol", options: ["Aldehyde", "Alcohol", "Ketone", "Acid"], correct: 1, explanation: "Ethanol = CH3CH2OH, alcohol" },
+
+            // กลุ่ม โครงสร้างและจำนวน C (5 ข้อ)
+            { question: "จำนวนคาร์บอนใน acetic acid (CH3COOH)?", options: ["1", "2", "3", "4"], correct: 1, explanation: "Acetic acid มี 2 คาร์บอน" },
+            { question: "โครงสร้างแบบย่อของ butane คืออะไร?", options: ["C3H8", "C4H10", "C5H12", "C6H14"], correct: 1, explanation: "Butane = C4H10" },
+            { question: "เขียนโครงสร้างแบบเส้นสำหรับ ethane แสดงอะไร?", options: ["C-C เดี่ยว", "C=C คู่", "C≡C สาม", "C-O"], correct: 0, explanation: "Ethane มีพันธะเดี่ยว" },
+            { question: "จำนวนคาร์บอนใน glucose (C6H12O6)?", options: ["5", "6", "7", "8"], correct: 1, explanation: "Glucose มี 6 คาร์บอน" },
+            { question: "โครงสร้างแบบย่อของ methanol คืออะไร?", options: ["CH4", "CH3OH", "CH3COOH", "C2H5OH"], correct: 1, explanation: "Methanol = CH3OH" }
+        ];
+
+        // ตัวแปรสำหรับ state ของเกม
+        let currentQuestion = 0;
+        let score = 0;
+        let badges = [];
+
+        // ฟังก์ชันเริ่มเกม
+        const startBtn = document.getElementById('start-btn');
+        const quizDiv = document.getElementById('quiz');
+        const questionEl = document.getElementById('question');
+        const optionsEl = document.getElementById('options');
+        const feedbackEl = document.getElementById('feedback');
+        const scoreEl = document.getElementById('score');
+        const badgesEl = document.getElementById('badges');
+        const restartBtn = document.getElementById('restart-btn');
+        const questionNumEl = document.getElementById('question-num');
+
+        startBtn.addEventListener('click', () => {
+            startBtn.style.display = 'none';
+            quizDiv.style.display = 'block';
+            loadQuestion();
+        });
+
+        // โหลดคำถาม
+        function loadQuestion() {
+            feedbackEl.innerHTML = '';
+            const q = questions[currentQuestion];
+            questionNumEl.innerHTML = `${currentQuestion + 1}/20`;
+            questionEl.innerHTML = q.question;
+            optionsEl.innerHTML = '';
+            // สุ่มช้อยส์เพื่อความแตกต่าง
+            const shuffledOptions = q.options.slice().sort(() => Math.random() - 0.5);
+            const correctIndex = shuffledOptions.indexOf(q.options[q.correct]);
+            shuffledOptions.forEach((opt, index) => {
+                const div = document.createElement('div');
+                div.classList.add('option');
+                div.innerHTML = opt;
+                div.addEventListener('click', () => handleAnswer(index === correctIndex, q.explanation));
+                optionsEl.appendChild(div);
+            });
+        }
+
+        // จัดการคำตอบ
+        function handleAnswer(isCorrect, explanation) {
+            if (isCorrect) {
+                score += 5;
+                feedbackEl.innerHTML = 'ถูกต้อง! โมเลกุลเปิดทางแล้ว 🏆 ' + explanation;
+                feedbackEl.style.color = 'green';
+                checkBadges();
+            } else {
+                feedbackEl.innerHTML = 'ผิดนะ! คำตอบที่ถูกคือ: ' + questions[currentQuestion].options[questions[currentQuestion].correct] + '. ' + explanation;
+                feedbackEl.style.color = 'red';
+            }
+            scoreEl.innerHTML = 'คะแนน: ' + score;
+            currentQuestion++;
+            if (currentQuestion < questions.length) {
+                setTimeout(loadQuestion, 2000); // รอ 2 วินาทีแล้วไปข้อถัดไป
+            } else {
+                showEnd();
+            }
+        }
+
+        // ตรวจ badges (รางวัล)
+        function checkBadges() {
+            if (currentQuestion === 4 && score >= 25) badges.push('Alkane Master');
+            if (currentQuestion === 9 && score >= 50) badges.push('Alkene/Alkyne Pro');
+            if (currentQuestion === 14 && score >= 75) badges.push('Functional Group Guru');
+            if (currentQuestion === 19 && score === 100) badges.push('Organic Chemistry Legend');
+            badgesEl.innerHTML = badges.map(b => `<div class="badge">${b}</div>`).join('');
+        }
+
+        // สิ้นสุดเกม
+        function showEnd() {
+            questionEl.innerHTML = 'จบการผจญภัย! คุณพบสมบัติเคมีแล้ว 🎉';
+            optionsEl.innerHTML = '';
+            feedbackEl.innerHTML = 'ระดับของคุณ: ' + (score >= 80 ? 'Expert' : score >= 50 ? 'Intermediate' : 'Beginner');
+            restartBtn.style.display = 'block';
+            restartBtn.addEventListener('click', resetGame);
+        }
+
+        // รีเซ็ตเกม
+        function resetGame() {
+            currentQuestion = 0;
+            score = 0;
+            badges = [];
+            badgesEl.innerHTML = '';
+            scoreEl.innerHTML = 'คะแนน: 0';
+            restartBtn.style.display = 'none';
+            loadQuestion();
+        }
+    </script>
+</body>
+</html>
+```
